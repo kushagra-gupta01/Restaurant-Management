@@ -2,7 +2,7 @@ package routes
 
 import(
 	"github.com/gin-gonic/gin"
-	"github.com/kushagra-gupta01/Restaurant-Management/controlllers"
+	"github.com/kushagra-gupta01/Restaurant-Management/controllers"
 )
 
 func UserRoutes(incomingRoutes *gin.Engine){
