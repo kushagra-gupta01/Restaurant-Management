@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/google/go-cmp/cmp/internal/function"
 	"github.com/kushagra-gupta01/Restaurant-Management/routes"
 )
 
