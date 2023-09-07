@@ -99,7 +99,7 @@ func UpdateMenu() gin.HandlerFunc{
 		menuId := c.Param("menu_id")
 		filter :=bson.M{"menu_id":menuId}
 
-		var updatObj primitive.D
+		var updateObj primitive.D
 		if menu.Start_Date !=nil && menu.End_Date !=nil{
 			if !inTimeSpan(*menu.Start_Date,*menu.End_Date,time.Now()){
 				msg := "kindly re-type the time"
@@ -107,18 +107,18 @@ func UpdateMenu() gin.HandlerFunc{
 				defer cancel()
 				return 
 			}
-			updatObj = append(updatObj, bson.E{"start_date":menu.Start_Date})
-			updatObj = append(updatObj, bson.E{"start_date":menu.End_Date})
+			updateObj = append(updateObj, bson.E{"start_date":menu.Start_Date})
+			updateObj = append(updateObj, bson.E{"start_date":menu.End_Date})
 
 		}
 		if menu.Name != ""{
-			updatObj = append(updatObj, bson.E{"name":menu.Name})
+			updateObj = append(updateObj, bson.E{"name":menu.Name})
 		}	
 		if menu.Category !=""{
-			updatObj = append(updatObj, bson.E{"category":menu.Category})
+			updateObj = append(updateObj, bson.E{"category":menu.Category})
 		}
 		menu.Created_at,_ = time.Parse(time.RFC3339,time.Now().Format(time.RFC3339))
-		updatObj = append(updatObj, bson.E{"created_at":menu.Created_at})
+		updateObj = append(updateObj, bson.E{"created_at":menu.Updated_at})
 		
 		upsert := true
 		opt:= options.UpdateOptions{
@@ -129,9 +129,9 @@ func UpdateMenu() gin.HandlerFunc{
 			ctx,
 			filter,
 			bson.D{
-				{"$set",updatObj},
+				{"$set",updateObj},
 			},
-			opt,
+			&opt,
 		)
 		if err !=nil{
 			msg := "Menu update failed"
