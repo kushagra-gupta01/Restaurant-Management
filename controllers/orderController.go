@@ -14,12 +14,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var OrderCollection *mongo.Collection = database.OpenCollection(database.Client,"order")
+var orderCollection *mongo.Collection = database.OpenCollection(database.Client,"order")
 
 func GetOrders() gin.HandlerFunc{
 	return func(c *gin.Context) {
 		var ctx,cancel = context.WithTimeout(context.Background(), 100*time.Second)
-		result,err :=OrderCollection.Find(context.TODO(), bson.M{})
+		result,err :=orderCollection.Find(context.TODO(), bson.M{})
 		defer cancel()
 		if err !=nil{
 			c.JSON(http.StatusInternalServerError,gin.H{"error":"error while listing order items"})
@@ -38,7 +38,7 @@ func GetOrder() gin.HandlerFunc{
 		orderId := c.Param("order_id")
 		var order model.Order
 
-		err:=OrderCollection.FindOne(ctx,bson.M{"order_id":orderId}).Decode(&order)
+		err:= orderCollection.FindOne(ctx,bson.M{"order_id":orderId}).Decode(&order)
 		defer cancel()
 		if err!=nil{
 			c.JSON(http.StatusInternalServerError,gin.H{"error":"error while fetching the orders"})
@@ -66,7 +66,7 @@ func CreateOrder() gin.HandlerFunc{
 		}
 
 		if order.Table_id != nil{
-			err:= TableCollection.FindOne(ctx,bson.M{"table_id":order.Table_id}).Decode(&table)
+			err:= tableCollection.FindOne(ctx,bson.M{"table_id":order.Table_id}).Decode(&table)
 			defer cancel()
 
 			if err !=nil{
@@ -82,7 +82,7 @@ func CreateOrder() gin.HandlerFunc{
 		order.ID = primitive.NewObjectID()
 		order.Order_id = order.ID.Hex()
 
-		result,InsertErr := OrderCollection.InsertOne(ctx,order)
+		result,InsertErr := orderCollection.InsertOne(ctx,order)
 		if InsertErr != nil{
 			msg := fmt.Sprintf("order item was not created")
 			c.JSON(http.StatusInternalServerError,gin.H{"error":msg})
@@ -106,7 +106,7 @@ func UpdateOrder() gin.HandlerFunc{
 		}
 		var updateObj primitive.D
 		if order.Table_id!=nil{
-			err := OrderCollection.FindOne(ctx,bson.M{"table_id":order.Table_id}).Decode(&order)
+			err := orderCollection.FindOne(ctx,bson.M{"table_id":order.Table_id}).Decode(&order)
 			defer cancel()
 			if err != nil{
 				msg := fmt.Sprintf("message:order not found")
@@ -124,7 +124,7 @@ func UpdateOrder() gin.HandlerFunc{
 			Upsert: &upsert,
 		}
 
-		result,err := OrderCollection.UpdateOne(
+		result,err := orderCollection.UpdateOne(
 			ctx,
 			filter,
 			bson.D{
@@ -150,7 +150,7 @@ func OrderItemOrderCreator(order model.Order) string{
 	order.ID = primitive.NewObjectID()
 	order.Order_id = order.ID.Hex()
 	
-	OrderCollection.InsertOne(ctx,order)
+	orderCollection.InsertOne(ctx,order)
 	defer cancel()
 
 	return order.Order_id

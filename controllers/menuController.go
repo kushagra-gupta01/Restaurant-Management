@@ -6,10 +6,9 @@ import (
 	"log"
 	"net/http"
 	"time"
-
 	"github.com/gin-gonic/gin"
 	"github.com/kushagra-gupta01/Restaurant-Management/database"
-	"github.com/kushagra-gupta01/Restaurant-Management/models"
+	"github.com/kushagra-gupta01/Restaurant-Management/model"
 	"github.com/kushagra-gupta01/Restaurant-Management/routes"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -40,7 +39,7 @@ func GetMenu() gin.HandlerFunc{
 	return func(c *gin.Context) {
 		ctx,cancel := context.WithTimeout(context.Background(),100*time.Second)
 		menuId:=c.Param("menu_id")
-		var menu models.Menu
+		var menu model.Menu
 
 		err:= menuCollection.FindOne(ctx,bson.M{"menu_id":menuId}).Decode(&menu)
 		defer cancel()
@@ -54,7 +53,7 @@ func GetMenu() gin.HandlerFunc{
 func CreateMenu()  gin.HandlerFunc{
 	return func(c *gin.Context) {
 		var ctx,cancel = context.WithTimeout(context.Background(),100*time.Second)
-		var menu models.Menu
+		var menu model.Menu
 
 		if err:= c.BindJSON(&menu);err!=nil{
 			c.JSON(http.StatusBadRequest,gin.H{"error":err.Error()})
@@ -90,7 +89,7 @@ func inTimeSpan(start,end, check time.Time) bool{
 func UpdateMenu() gin.HandlerFunc{
 	return func(c *gin.Context) {
 		ctx,cancel:=context.WithTimeout(context.Background(),100*time.Second)
-		var menu models.Menu
+		var menu model.Menu
 		if err:= c.BindJSON(&menu);err!=nil{
 			c.JSON(http.StatusBadRequest,gin.H{"error":err.Error()})
 			return
@@ -100,15 +99,15 @@ func UpdateMenu() gin.HandlerFunc{
 		filter :=bson.M{"menu_id":menuId}
 
 		var updateObj primitive.D
-		if menu.Start_Date !=nil && menu.End_Date !=nil{
-			if !inTimeSpan(*menu.Start_Date,*menu.End_Date,time.Now()){
+		if menu.Start_date !=nil && menu.End_date !=nil{
+			if !inTimeSpan(*menu.Start_date,*menu.End_date,time.Now()){
 				msg := "kindly re-type the time"
 				c.JSON(http.StatusInternalServerError,gin.H{"error": msg})
 				defer cancel()
 				return 
 			}
-			updateObj = append(updateObj, bson.E{"start_date":menu.Start_Date})
-			updateObj = append(updateObj, bson.E{"start_date":menu.End_Date})
+			updateObj = append(updateObj, bson.E{"start_date" : menu.Start_date})
+			updateObj = append(updateObj, bson.E{"start_date" : menu.End_date})
 
 		}
 		if menu.Name != ""{

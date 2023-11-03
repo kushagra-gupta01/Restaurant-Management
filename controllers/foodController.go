@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/kushagra-gupta01/Restaurant-Management/database"
-	"github.com/kushagra-gupta01/Restaurant-Management/models"
+	"github.com/kushagra-gupta01/Restaurant-Management/model"
 	"github.com/kushagra-gupta01/Restaurant-Management/routes"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -62,7 +62,7 @@ func GetFood() gin.HandlerFunc{
 	return func(c *gin.Context) {
 		var ctx,cancel = context.WithTimeout(context.Background(),100*time.Second)
 		foodId :=c.Param("food_id")
-		var food models.Food
+		var food model.Food
 		
 		err:=foodCollection.FindOne(ctx,bson.M{"food_id":foodId}).Decode(&food)
 		defer cancel()
@@ -76,8 +76,8 @@ func GetFood() gin.HandlerFunc{
 func CreateFood() gin.HandlerFunc{
 	return func(c *gin.Context) {
 		var ctx,cancel = context.WithTimeout(context.Background(),100*time.Second)
-		var menu models.Menu
-		var food models.Food
+		var menu model.Menu
+		var food model.Food
 
 		if err:= c.BindJSON(&food); err !=nil{
 			c.JSON(http.StatusBadRequest,gin.H{"error":err.Error()})
@@ -127,8 +127,8 @@ func toFixed(num float64,precision int)float64{
 func UpdateFood() gin.HandlerFunc{
 	return func(c *gin.Context) {
 		ctx,cancel := context.WithTimeout(context.Background(),100*time.Second)
-		var menu models.Menu
-		var food models.Food
+		var menu model.Menu
+		var food model.Food
 		foodId := c.Param("food_id")
 
 		if err:=c.BindJSON(&food);err!=nil{
