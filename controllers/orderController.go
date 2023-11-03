@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"time"
-
 	"github.com/gin-gonic/gin"
 	"github.com/kushagra-gupta01/Restaurant-Management/routes"
 	"go.keploy.io/server/pkg/models"
@@ -40,7 +39,7 @@ func GetOrder() gin.HandlerFunc{
 
 		err:=OrderCollection.FindOne(ctx,bson.M{"order_id":orderId}).Decode(&order)
 		defer cancel()
-		if err:=nil{
+		if err!=nil{
 			c.JSON(http.StatusInternalServerError,gin.H{"error":"error while fetching the orders"})
 		}
 		c.JSON(http.StatusOK,order)
@@ -48,8 +47,10 @@ func GetOrder() gin.HandlerFunc{
 }
 
 func CreateOrder() gin.HandlerFunc{
-	return func(ctx *gin.Context) {
-
+	return func(c *gin.Context) {
+		ctx,cancel = context.WithTimeout(context.Background(),100*time.Second)
+		var order models.Order
+		var table models.Table
 	}
 }
 

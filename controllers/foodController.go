@@ -51,7 +51,7 @@ func GetFoods() gin.HandlerFunc{
 			c.JSON(http.StatusInternalServerError,gin.H{"error":"error occured while listing items"})
 		}
 		var allFoods []bson.M
-		if err = result.All(ctx,allFoods),err!=nil{
+		if err = result.All(ctx, &allFoods),err!=nil{
 			log.Fatal(err)
 		}
 		c.JSON(http.StatusOK,allFoods[0])
@@ -75,7 +75,7 @@ func GetFood() gin.HandlerFunc{
 
 func CreateFood() gin.HandlerFunc{
 	return func(c *gin.Context) {
-		var ctx,cancel =context.WithTimeout(context.Background(),100*time.Second)
+		var ctx,cancel = context.WithTimeout(context.Background(),100*time.Second)
 		var menu models.Menu
 		var food models.Food
 
@@ -129,7 +129,7 @@ func UpdateFood() gin.HandlerFunc{
 		ctx,cancel := context.WithTimeout(context.Background(),100*time.Second)
 		var menu models.Menu
 		var food models.Food
-		foodId := c,Param("food_id")
+		foodId := c.Param("food_id")
 
 		if err:=c.BindJSON(&food);err!=nil{
 			c.JSON(http.StatusBadRequest,gin.H{"error":err.Error()})
@@ -157,8 +157,8 @@ func UpdateFood() gin.HandlerFunc{
 			updateObj = append(updateObj,bson.E{"menu":food.Price})
 		}
 
-		food.Created_at,_ = time.Parse(time.RFC3339,time.Now().Format(time.RFC3339))
-		updateObj = append(updateObj,bson.E{"created_at":food.Updated_at})
+		food.Updated_at,_ = time.Parse(time.RFC3339,time.Now().Format(time.RFC3339))
+		updateObj = append(updateObj,bson.E{"created_at",food.Updated_at})
 		
 		upsert := true
 		filter := bson.M{"food_id":foodId}
