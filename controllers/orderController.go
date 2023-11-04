@@ -8,7 +8,6 @@ import (
 	"time"
 	"github.com/gin-gonic/gin"
 	"github.com/kushagra-gupta01/Restaurant-Management/model"
-	"github.com/kushagra-gupta01/Restaurant-Management/routes"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"

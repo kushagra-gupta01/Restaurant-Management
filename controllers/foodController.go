@@ -11,7 +11,6 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/kushagra-gupta01/Restaurant-Management/database"
 	"github.com/kushagra-gupta01/Restaurant-Management/model"
-	"github.com/kushagra-gupta01/Restaurant-Management/routes"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -34,13 +33,13 @@ func GetFoods() gin.HandlerFunc{
 		startIndex,err = strconv.Atoi(c.Query("startIndex"))
 
 		matchStage := bson.D{{"$match",bson.D{{}}}}
-		groupStage	:=bson.D{{"$group",bson.D{{"_id",bson.D{{"_id","null"}}},{"total_count",bson.D{{"$sum,1"}}},{"data",bson.D{{"$push","$$ROOT"}}}}}}}
+		groupStage	:=bson.D{{"$group",bson.D{{"_id",bson.D{{"_id","null"}}},{"total_count",bson.D{{"$sum,1"}}},{"data",bson.D{{"$push","$$ROOT"}}}}}}
 		projectStage := bson.D{
 			"$project",bson.D{
 				{"_id",0},
 				{"total_count",1},
 				{"food_items",bson.D{{"$slice",[]interface{}{"$data",startIndex,recordPerPage}}}},
-			}
+			},
 		}
 
 		result,err :=foodCollection.Aggregate(ctx,mongo.Pipeline{
@@ -51,7 +50,7 @@ func GetFoods() gin.HandlerFunc{
 			c.JSON(http.StatusInternalServerError,gin.H{"error":"error occured while listing items"})
 		}
 		var allFoods []bson.M
-		if err = result.All(ctx, &allFoods),err!=nil{
+		if err = result.All(ctx, &allFoods);err!=nil{
 			log.Fatal(err)
 		}
 		c.JSON(http.StatusOK,allFoods[0])
