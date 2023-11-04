@@ -25,7 +25,7 @@ func DBinstance() *mongo.Client{
 
 var Client *mongo.Client = DBinstance()
 
-func OpenCollection(client *mongo.Client) *mongo.Collection{
+func OpenCollection(client *mongo.Client, collectionName string) *mongo.Collection{
 	var Collection *mongo.Collection = client.Database("restaurant").Collection("collectionName")
 	return Collection
 }	
