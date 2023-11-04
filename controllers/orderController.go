@@ -7,9 +7,11 @@ import (
 	"net/http"
 	"time"
 	"github.com/gin-gonic/gin"
+	"github.com/kushagra-gupta01/Restaurant-Management/database"
 	"github.com/kushagra-gupta01/Restaurant-Management/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -48,7 +50,7 @@ func GetOrder() gin.HandlerFunc{
 
 func CreateOrder() gin.HandlerFunc{
 	return func(c *gin.Context) {
-		ctx,cancel = context.WithTimeout(context.Background(),100*time.Second)
+		ctx,cancel := context.WithTimeout(context.Background(),100*time.Second)
 		var order model.Order
 		var table model.Table
 
