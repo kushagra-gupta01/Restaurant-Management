@@ -105,18 +105,18 @@ func UpdateMenu() gin.HandlerFunc{
 				defer cancel()
 				return 
 			}
-			updateObj = append(updateObj, bson.E{"start_date" : menu.Start_date})
-			updateObj = append(updateObj, bson.E{"start_date" : menu.End_date})
+			updateObj = append(updateObj, bson.E{"start_date", menu.Start_date})
+			updateObj = append(updateObj, bson.E{"start_date", menu.End_date})
 
 		}
 		if menu.Name != ""{
-			updateObj = append(updateObj, bson.E{"name":menu.Name})
+			updateObj = append(updateObj, bson.E{"name", menu.Name})
 		}	
 		if menu.Category !=""{
-			updateObj = append(updateObj, bson.E{"category":menu.Category})
+			updateObj = append(updateObj, bson.E{"category", menu.Category})
 		}
 		menu.Created_at,_ = time.Parse(time.RFC3339,time.Now().Format(time.RFC3339))
-		updateObj = append(updateObj, bson.E{"created_at":menu.Updated_at})
+		updateObj = append(updateObj, bson.E{"created_at", menu.Updated_at})
 		
 		upsert := true
 		opt:= options.UpdateOptions{

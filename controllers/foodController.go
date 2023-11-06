@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math"
 	"net/http"
 	"strconv"
 	"time"
@@ -11,8 +12,10 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/kushagra-gupta01/Restaurant-Management/database"
 	"github.com/kushagra-gupta01/Restaurant-Management/model"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var foodCollection *mongo.Collection = database.OpenCollection(database.Client,"food")
@@ -33,18 +36,17 @@ func GetFoods() gin.HandlerFunc{
 		startIndex,err = strconv.Atoi(c.Query("startIndex"))
 
 		matchStage := bson.D{{"$match",bson.D{{}}}}
-		groupStage	:=bson.D{{"$group",bson.D{{"_id",bson.D{{"_id","null"}}},{"total_count",bson.D{{"$sum,1"}}},{"data",bson.D{{"$push","$$ROOT"}}}}}}
+		groupStage	:=bson.D{{"$group",bson.D{{"_id",bson.D{{"_id","null"}}},{"total_count",bson.D{{"$sum",1}}},{"data",bson.D{{"$push","$$ROOT"}}}}}}
 		projectStage := bson.D{
-			"$project",bson.D{
-				{"_id",0},
-				{"total_count",1},
-				{"food_items",bson.D{{"$slice",[]interface{}{"$data",startIndex,recordPerPage}}}},
-			},
-		}
+			{
+				"$project",bson.D{
+					{"_id",0},
+					{"total_count",1},
+					{"food_items",bson.D{{"$slice",[]interface{}{"$data",startIndex,recordPerPage}}}},
+				}}}
 
 		result,err :=foodCollection.Aggregate(ctx,mongo.Pipeline{
-			matchStage, groupStage, projectStage
-		})
+			matchStage, groupStage, projectStage})
 		defer cancel()
 		if err!=nil{
 			c.JSON(http.StatusInternalServerError,gin.H{"error":"error occured while listing items"})
@@ -100,7 +102,7 @@ func CreateFood() gin.HandlerFunc{
 		food.Updated_at, _ = time.Parse(time.RFC3339,time.Now().Format(time.RFC3339))
 		food.ID =primitive.NewObjectID()
 		food.Food_id=food.ID.Hex()
-		var num = toFixed(food.price,2)
+		var num = toFixed(*food.Price,2)
 		food.Price = &num
 		
 		result,insertErr := foodCollection.InsertOne(ctx,food)
@@ -119,7 +121,7 @@ func round(num float64) int {
 }
 
 func toFixed(num float64,precision int)float64{
-	output := mat.Pow(10,float64(precision))
+	output := math.Pow(10,float64(precision))
 	return float64(round(num*output))/output
 }
 
@@ -143,17 +145,17 @@ func UpdateFood() gin.HandlerFunc{
 			updateObj = append(updateObj,bson.E{"price",food.Price})
 		}
 		if food.Food_image!=nil{
-			updateObj = append(updateObj,bson.E{"food_image":food.Food_image})
+			updateObj = append(updateObj,bson.E{"food_image", food.Food_image})
 		}
 		if food.Menu_id!=nil{
 			err := menuCollection.FindOne(ctx,bson.M{"menu_id":food.Menu_id}).Decode(&menu)
 			defer cancel()
 			if err !=nil{
-				msg := Sprintf("message:menu not found")
+				msg := fmt.Sprintf("message:menu not found")
 				c.JSON(http.StatusInternalServerError,gin.H{"error":msg})
 				return
 			}
-			updateObj = append(updateObj,bson.E{"menu":food.Price})
+			updateObj = append(updateObj,bson.E{"menu", food.Price})
 		}
 
 		food.Updated_at,_ = time.Parse(time.RFC3339,time.Now().Format(time.RFC3339))
@@ -176,7 +178,7 @@ func UpdateFood() gin.HandlerFunc{
 		defer cancel()
 
 		if err!=nil{
-			msg:=Sprintf("Food item Update failed")
+			msg:= fmt.Sprintf("Food item Update failed")
 			c.JSON(http.StatusInternalServerError,gin.H{"error":msg})
 			return
 		}

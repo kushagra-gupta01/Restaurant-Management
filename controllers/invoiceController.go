@@ -12,7 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/x/mongo/driver/mongocrypt/options"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type InvoiceViewFormat struct{
@@ -66,7 +66,7 @@ func GetInvoice() gin.HandlerFunc{
 		invoiceView.Payment_due_date = invoice.Payment_due_date
 		
 		invoiceView.Payment_method = "NULL"
-		if invoiceView.Payment_method != nil{
+		if invoice.Payment_method != nil{
 			invoiceView.Payment_method = *invoice.Payment_method
 		}
 
@@ -152,7 +152,7 @@ func UpdateInvoice() gin.HandlerFunc{
 		}
 
 		invoice.Updated_at,_ = time.Parse(time.RFC3339,time.Now().Format(time.RFC3339))
-		updateObj = append(updateObj, bson.E{"updated_at" : invoice.Updated_at})
+		updateObj = append(updateObj, bson.E{"updated_at", invoice.Updated_at})
 
 		upsert:= true
 		opt := options.UpdateOptions{
@@ -168,7 +168,7 @@ func UpdateInvoice() gin.HandlerFunc{
 			ctx,
 			filter,
 			bson.D{
-				{"$set":updateObj},
+				{"$set",updateObj},
 			},
 			&opt,
 		)

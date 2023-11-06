@@ -101,20 +101,20 @@ func UpdateOrder() gin.HandlerFunc{
 		var table model.Table
 		orderId := c.Param("order_id")
 
-		if err := c.BindJSON(&food);err!=nil{
+		if err := c.BindJSON(&order);err!=nil{
 			c.JSON(http.StatusInternalServerError,gin.H{"error":err.Error()})
 			return
 		}
 		var updateObj primitive.D
 		if order.Table_id!=nil{
-			err := orderCollection.FindOne(ctx,bson.M{"table_id":order.Table_id}).Decode(&order)
+			err := orderCollection.FindOne(ctx,bson.M{"table_id":order.Table_id}).Decode(&table)
 			defer cancel()
 			if err != nil{
 				msg := fmt.Sprintf("message:order not found")
 				c.JSON(http.StatusInternalServerError,gin.H{"error":msg})
 				return
 			}
-			updateObj = append(updateObj,bson.E{"table_id":order.Table_id})
+			updateObj = append(updateObj,bson.E{"table_id", order.Table_id})
 		}
 		order.Updated_at, _ = time.Parse(time.RFC3339,time.Now().Format(time.RFC3339))
 		updateObj = append(updateObj,bson.E{"updated_at",order.Updated_at})
@@ -144,7 +144,7 @@ func UpdateOrder() gin.HandlerFunc{
 }
 
 func OrderItemOrderCreator(order model.Order) string{
-	
+	ctx,cancel := context.WithTimeout(context.Background(),100*time.Second)
 	order.Created_at,_ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	order.Updated_at,_ = time.Parse(time.RFC3339,time.Now().Format(time.RFC3339))
 
